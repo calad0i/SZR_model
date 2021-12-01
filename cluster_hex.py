@@ -14,8 +14,8 @@ def check(lattice:np.ndarray, queue):
     right  = lambda xy: ((xy[0]+1)%L, xy[1]      )
     up     = lambda xy: (      xy[0], (xy[1]+1)%L)
     down   = lambda xy: (      xy[0], (xy[1]-1)%L)
-    diag_top  = lambda xy: ((xy[0]-1)%L, (xy[1]+1)%L)
-    diag_down = lambda xy: ((xy[0]-1)%L, (xy[1]-1)%L)
+    diag_top  = lambda xy: ((xy[0] + 1 - 2*(xy[1]%2))%L, (xy[1] + 1)%L)
+    diag_down = lambda xy: ((xy[0] + 1 - 2*(xy[1]%2))%L, (xy[1] - 1)%L)
     
     counter = 0
     
@@ -50,8 +50,8 @@ def update(lattice:np.ndarray, queue:list, k:float, b:float):
     right  = lambda xy: ((xy[0]+1)%L, xy[1]      )
     up     = lambda xy: (      xy[0], (xy[1]+1)%L)
     down   = lambda xy: (      xy[0], (xy[1]-1)%L)
-    diag_top  = lambda xy: ((xy[0]-1)%L, (xy[1]+1)%L)
-    diag_down = lambda xy: ((xy[0]-1)%L, (xy[1]-1)%L)
+    diag_top  = lambda xy: ((xy[0] + 1 - 2*(xy[1]%2))%L, (xy[1] + 1)%L)
+    diag_down = lambda xy: ((xy[0] + 1 - 2*(xy[1]%2))%L, (xy[1] - 1)%L)
     
     if len(queue) == 0:
         return lattice, queue
@@ -61,8 +61,8 @@ def update(lattice:np.ndarray, queue:list, k:float, b:float):
     
     if r < b/(b + k):
         xyz, xys = queue.pop(ind)
-        #assert(lattice[xyz] == 1)
-        #assert(lattice[xys] == 0)
+        assert(lattice[xyz] == 1)
+        assert(lattice[xys] == 0)
         lattice[xys] = 1
         
         for xyn in left(xys), right(xys), up(xys), down(xys), diag_top(xys), diag_down(xys):
@@ -74,22 +74,22 @@ def update(lattice:np.ndarray, queue:list, k:float, b:float):
             return lattice, queue
         
         for xyn in left(xys), right(xys), up(xys), down(xys), diag_top(xys), diag_down(xys):
-            if lattice[xyn] == 1 and xyn != xyz and (xyn, xys) in queue:
+            if lattice[xyn] == 1 and xyn != xyz:
                 queue.remove((xyn, xys))
  
         
 
     else:
         xyz, xys = queue.pop(ind)
-        #assert(lattice[xyz] == 1)
-        #assert(lattice[xys] == 0)
+        assert(lattice[xyz] == 1)
+        assert(lattice[xys] == 0)
         lattice[xyz] = 2
         
         if len(queue) == 0:
             return lattice, queue
         
         for xyn in left(xyz), right(xyz), up(xyz), down(xyz), diag_top(xyz), diag_down(xyz):
-            if lattice[xyn] == 0 and xyn != xys and (xyz, xyn) in queue:
+            if lattice[xyn] == 0 and xyn != xys:
                 queue.remove((xyz, xyn))
                
     
@@ -104,8 +104,8 @@ def init_lattice(L:int, xy0):
     right  = lambda xy: ((xy[0]+1)%L, xy[1]      )
     up     = lambda xy: (      xy[0], (xy[1]+1)%L)
     down   = lambda xy: (      xy[0], (xy[1]-1)%L)
-    diag_top  = lambda xy: ((xy[0]-1)%L, (xy[1]+1)%L)
-    diag_down = lambda xy: ((xy[0]-1)%L, (xy[1]-1)%L)
+    diag_top  = lambda xy: ((xy[0] + 1 - 2*(xy[1]%2))%L, (xy[1] + 1)%L)
+    diag_down = lambda xy: ((xy[0] + 1 - 2*(xy[1]%2))%L, (xy[1] - 1)%L)
     
     lattice = np.zeros((L, L), dtype = int64)
     lattice[xy0] = 1
@@ -128,8 +128,8 @@ def init_lattice_(lattice:np.ndarray, queue:list, xy0):
     right  = lambda xy: ((xy[0]+1)%L, xy[1]      )
     up     = lambda xy: (      xy[0], (xy[1]+1)%L)
     down   = lambda xy: (      xy[0], (xy[1]-1)%L)
-    diag_top  = lambda xy: ((xy[0]-1)%L, (xy[1]+1)%L)
-    diag_down = lambda xy: ((xy[0]-1)%L, (xy[1]-1)%L)
+    diag_top  = lambda xy: ((xy[0] + 1 - 2*(xy[1]%2))%L, (xy[1] + 1)%L)
+    diag_down = lambda xy: ((xy[0] + 1 - 2*(xy[1]%2))%L, (xy[1] - 1)%L)
     
     lattice[:, :] = 0
     lattice[xy0] = 1
@@ -153,9 +153,6 @@ def run_lattice_(lattice:np.ndarray, queue:list, k:float, b:float):
     while len(queue) != 0:
         counter = counter + 1
         lattice, queue = update(lattice, queue, k, b)
-        
-#        if counter%100 == 0:
-#            print(str(counter) + ":" + str(time.time() - start_time))
             
     return lattice, queue
 
@@ -179,16 +176,13 @@ def run_check_lattice(L:int, xy0, k:float, b:float):
            
         counter = counter + 1
         lattice, queue = update(lattice, queue, k, b)
-        
-#        if counter%100 == 0:
-#            print(str(counter) + ":" + str(time.time() - start_time))
-        
+                
     return lattice, queue
 
-N=200000
+N=100000
 L=512
 L2=L//2
-alpha=0.656
+alpha=0.53
 
 config.THREADING_LAYER = 'threadsafe'
 @njit(parallel = True)
