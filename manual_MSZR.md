@@ -12,6 +12,10 @@ The scripts are dependent on the following libraries: `numpy, numba, matplotlib,
 
 `utility.py`: Utility functions for plotting results. Not important.
 
+`modified_SZR.ipynb`: notebook performing the Occupancy / MSZR model studies.
+
+`poc.ipynb`: Initial test for some concepts and an ultra-inefficient implementation for the SZR model on a lattice, obsolete.
+
 ---
 
 ### `sorted_list.py`
